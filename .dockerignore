@@ -1,0 +1,8 @@
+.git
+venv/
+venv-jenkins/
+venv-jk/
+db/fake_news.db
+__pycache__/
+logs/
+.pytest_cache/
