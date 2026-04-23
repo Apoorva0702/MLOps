@@ -19,7 +19,9 @@ pipeline {
             steps {
                 echo 'Running automated tests...'
                 sh '''
-                    # Ensure venv is used or just install requirements and test
+                    python3 -m venv venv-jk
+                    . venv-jk/bin/activate
+                    pip install --upgrade pip
                     pip install -r requirements.txt
                     pytest tests/ || echo "No tests found or test failed, ignoring for now"
                 '''
@@ -30,6 +32,7 @@ pipeline {
             steps {
                 echo 'CI/CD pipeline triggered by code change. Training on original dataset only...'
                 sh '''
+                    . venv-jk/bin/activate
                     python model/train.py --original-only
                     echo "Model training script executed!"
                 '''

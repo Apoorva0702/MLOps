@@ -19,7 +19,9 @@ pipeline {
             steps {
                 echo 'Running automated tests...'
                 sh '''
-                    # Ensure venv is used or just install requirements and test
+                    python3 -m venv venv-jk
+                    . venv-jk/bin/activate
+                    pip install --upgrade pip
                     pip install -r requirements.txt
                     pytest tests/ || echo "No tests found or test failed, ignoring for now"
                 '''
@@ -30,6 +32,7 @@ pipeline {
             steps {
                 echo 'Retraining pipeline triggered by misclassification threshold! Training on Original Data + Database Data...'
                 sh '''
+                    . venv-jk/bin/activate
                     python model/train.py
                     echo "Model full retraining script executed!"
                 '''
