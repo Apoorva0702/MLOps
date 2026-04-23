@@ -5,3 +5,6 @@ torch
 requests
 python-logstash-async
 hvac
+pandas
+datasets
+pytest
