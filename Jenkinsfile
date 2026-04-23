@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        DOCKERHUB_CREDENTIALS = 'yourdockerhubuser'
+        DOCKERHUB_CREDENTIALS = 'ApoorvaKharya'
         DOCKER_IMAGE = "${DOCKERHUB_CREDENTIALS}/fake-news-app:${env.BUILD_ID}"
         DOCKER_LATEST = "${DOCKERHUB_CREDENTIALS}/fake-news-app:latest"
     }
