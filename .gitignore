@@ -3,3 +3,4 @@ db/fake_news.db
 __pycache__/
 logs/
 .pytest_cache/
+model/bert_fake_news_model/
