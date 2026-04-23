@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fake News Detector | AI Powered</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    
+    <main class="container">
+        <header>
+            <h1>Fake News Detector</h1>
+            <p>Paste an article below to analyze its authenticity using our advanced AI model.</p>
+        </header>
+
+        <section class="input-section">
+            <textarea id="article-input" placeholder="Type or paste the news article here..."></textarea>
+            <div class="actions">
+                <button id="predict-btn" class="primary-btn">
+                    <span class="btn-text">Analyze Article</span>
+                    <span class="spinner hidden"></span>
+                </button>
+            </div>
+        </section>
+
+        <section id="results-section" class="results-section hidden">
+            <div class="result-card">
+                <h2 id="prediction-label">REAL</h2>
+                <div class="confidence-wrapper">
+                    <span>Confidence Score:</span>
+                    <span id="confidence-score" class="score">95.4%</span>
+                </div>
+            </div>
+            
+            <div id="feedback-section" class="feedback-section">
+                <p>Was this prediction correct?</p>
+                <div class="feedback-actions">
+                    <button id="feedback-correct" class="feedback-btn outline-btn">Yes, it's correct</button>
+                    <button id="feedback-incorrect" class="feedback-btn outline-btn">No, it's wrong</button>
+                </div>
+            </div>
+            
+            <div id="feedback-thanks" class="feedback-thanks hidden">
+                <p>Thank you for your feedback! It helps improve the model.</p>
+            </div>
+        </section>
+    </main>
+    <script src="/static/script.js"></script>
+</body>
+</html>

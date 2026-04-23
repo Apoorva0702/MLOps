@@ -1,0 +1,12 @@
+---
+- name: Apply Kubernetes Deployment and Service
+  kubernetes.core.k8s:
+    state: present
+    definition: "{{ lookup('file', '../../../../k8s/' + item) | from_yaml }}"
+  loop:
+    - deployment.yaml
+    - service.yaml
+    - hpa.yaml
+
+- name: Force Rollout of Deployment to pick up new image
+  command: kubectl rollout restart deployment fake-news-api

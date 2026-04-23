@@ -1,0 +1,6 @@
+---
+- name: Deploy Fake News Detector to Kubernetes
+  hosts: localhost
+  connection: local
+  roles:
+    - deploy
