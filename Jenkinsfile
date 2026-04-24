@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        DOCKERHUB_CREDENTIALS = 'ApoorvaKharya'
+        DOCKERHUB_CREDENTIALS = 'apoorvakharya'
         DOCKER_IMAGE = "${DOCKERHUB_CREDENTIALS}/fake-news-app:${env.BUILD_ID}"
         DOCKER_LATEST = "${DOCKERHUB_CREDENTIALS}/fake-news-app:latest"
     }
@@ -50,7 +50,7 @@ pipeline {
             steps {
                 echo 'Pushing image to container registry...'
                 // Ensure Jenkins has docker credentials configured if actually running
-                withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', passwordVariable: 'DOCKERHUB_PASS', usernameVariable: 'DOCKERHUB_USER')]) {
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', passwordVariable: 'DOCKERHUB_PASS', usernameVariable: 'DOCKERHUB_USER')]) {
                     sh "echo \$DOCKERHUB_PASS | docker login -u \$DOCKERHUB_USER --password-stdin"
                     sh "docker push ${DOCKER_IMAGE}"
                     sh "docker push ${DOCKER_LATEST}"
