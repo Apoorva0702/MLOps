@@ -62,7 +62,9 @@ pipeline {
             steps {
                 echo 'Deploying via Ansible to K8s cluster using Roles...'
                 sh '''
-                    ansible-playbook ansible/deploy.yml
+                    . venv-jk/bin/activate
+                    pip install kubernetes
+                    ansible-playbook ansible/deploy.yml -e "ansible_python_interpreter=$(pwd)/venv-jk/bin/python"
                     echo "Ansible deploy triggered!"
                 '''
             }
@@ -77,4 +79,3 @@ pipeline {
             echo "Pipeline Failed! Check Jenkins logs."
         }
     }
-}
