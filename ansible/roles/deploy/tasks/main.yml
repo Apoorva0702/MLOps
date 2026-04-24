@@ -2,6 +2,7 @@
 - name: Apply Kubernetes Deployment and Service
   kubernetes.core.k8s:
     state: present
+    namespace: default
     definition: "{{ lookup('file', '../../../../k8s/' + item) | from_yaml }}"
   loop:
     - deployment.yaml
