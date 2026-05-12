@@ -8,3 +8,4 @@ hvac
 pandas
 datasets
 pytest
+accelerate>=1.1.0
