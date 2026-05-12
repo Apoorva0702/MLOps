@@ -163,13 +163,24 @@ def feedback(data: FeedbackInput):
     if misclassified == 1:
         cur.execute("SELECT COUNT(*) FROM news_predictions WHERE is_misclassified=1")
         count = cur.fetchone()[0]
-        if count > 0 and count % 10 == 0:
+        if count > 0 and count % 2 == 0:
             logging.warning(f"Misclassification count hit {count}. Triggering Jenkins retraining pipeline!")
             try:
-                # Replace with actual Jenkins webhook URL / token authentication
-                webhook_url = "http://jenkins:8080/job/Fake-News-Retraining/build"
-                requests.post(webhook_url, timeout=5)
-                logger.info("Successfully triggered Jenkins webhook for retraining.")
+                auth = ("admin", "93311eeb42b3443db6deae51dff0e571")
+                session = requests.Session()
+                session.auth = auth
+                
+                crumb_url = "http://localhost:9090/crumbIssuer/api/json"
+                crumb_resp = session.get(crumb_url, timeout=5)
+                crumb_data = crumb_resp.json()
+                headers = {crumb_data['crumbRequestField']: crumb_data['crumb']}
+                
+                webhook_url = "http://localhost:9090/job/fake_news_Retraining/build"
+                resp = session.post(webhook_url, headers=headers, timeout=5)
+                if resp.status_code in [200, 201]:
+                    logger.info("Successfully triggered Jenkins webhook for retraining.")
+                else:
+                    logger.error(f"Failed to trigger Jenkins, status code: {resp.status_code}")
             except Exception as e:
                 logger.error(f"Error triggering Jenkins: {e}")
 
