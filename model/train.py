@@ -69,6 +69,10 @@ def train(original_only=False):
                 if t is not None and isinstance(t, str):
                     valid_texts.append(t)
                     valid_labels.append(l)
+                    
+            # Subsample to prevent OOM and excessive training times in CI
+            valid_texts = valid_texts[:500]
+            valid_labels = valid_labels[:500]
             
             texts.extend(valid_texts)
             labels.extend(valid_labels)
