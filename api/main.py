@@ -33,18 +33,31 @@ logger.addHandler(logstash_handler)
 
 app = FastAPI()
 
-# Vault Configuration (Mock credentials pull)
+JENKINS_AUTH = None
+
 def fetch_vault_secrets():
-    print("Attempting to fetch secrets from Vault...")
+    global JENKINS_AUTH
+    logger.info("Attempting to fetch secrets from HashiCorp Vault...")
+    vault_url = os.environ.get('VAULT_ADDR', 'http://vault:8200')
+    vault_token = os.environ.get('VAULT_TOKEN')  # Should be provided via environment variable
+    
+    if not vault_token:
+        logger.warning("VAULT_TOKEN not set. Vault integration will be skipped.")
+        return
+
     try:
-        client = hvac.Client(url='http://vault:8200', token='dev-only-token')
+        client = hvac.Client(url=vault_url, token=vault_token)
         if client.is_authenticated():
-             print("Vault authenticated.")
-             # Dummy secret grab
-             # secret_version_response = client.secrets.kv.v2.read_secret_version(path='fake-news-secret')
-             # print("Secret grabbed.")
+             # Attempt to read Jenkins credentials from Vault KV engine
+             try:
+                 read_response = client.secrets.kv.v2.read_secret_version(path='jenkins', mount_point='secret')
+                 secrets = read_response['data']['data']
+                 JENKINS_AUTH = (secrets['username'], secrets['password'])
+                 logger.info("Successfully authenticated and fetched Jenkins credentials from Vault.")
+             except Exception as e:
+                 logger.error(f"Vault authenticated but failed to read 'jenkins' secret: {e}")
     except Exception as e:
-        logger.warning(f"Could not connect to Vault: {e}")
+        logger.warning(f"Could not connect to Vault service at {vault_url}: {e}")
 
 fetch_vault_secrets()
 
@@ -166,7 +179,15 @@ def feedback(data: FeedbackInput):
         if count > 0 and count % 2 == 0:
             logging.warning(f"Misclassification count hit {count}. Triggering Jenkins retraining pipeline!")
             try:
-                auth = ("admin", "93311eeb42b3443db6deae51dff0e571")
+                # Use dynamic credentials from Vault; fallback to env vars if Vault failed
+                username = JENKINS_AUTH[0] if JENKINS_AUTH else os.environ.get('JENKINS_USER', 'admin')
+                password = JENKINS_AUTH[1] if JENKINS_AUTH else os.environ.get('JENKINS_PASS')
+                
+                if not password:
+                    logger.error("No Jenkins password found in Vault or Environment. Retraining trigger failed.")
+                    return
+
+                auth = (username, password)
                 session = requests.Session()
                 session.auth = auth
                 
