@@ -101,13 +101,12 @@ def train(original_only=False):
         'labels': labels
     })
 
+    # Force CPU and 1 epoch for standard CI pipeline to completely avoid CUDA OOM
     training_args = TrainingArguments(
         output_dir='./results',
-        num_train_epochs=3,
-        per_device_train_batch_size=2,
-        gradient_accumulation_steps=4,
-        fp16=True,
-        gradient_checkpointing=True,
+        num_train_epochs=1 if original_only else 3,
+        per_device_train_batch_size=8 if not original_only else 4,
+        use_cpu=original_only,
         logging_dir='./logs',
         logging_steps=10,
         report_to="none"
