@@ -54,6 +54,29 @@ def train(original_only=False):
                 print(f"Successfully appended {len(df)} original training records.")
         except Exception as e:
             print(f"Error loading original dataset: {e}")
+    else:
+        print(f"Local original dataset not found at {DATA_PATH}. Fetching WELFake from Hugging Face...")
+        try:
+            from datasets import load_dataset
+            dataset = load_dataset('davanstrien/WELFake', split='train')
+            
+            orig_texts = dataset['text']
+            orig_labels = dataset['label']
+            
+            valid_texts = []
+            valid_labels = []
+            for t, l in zip(orig_texts, orig_labels):
+                if t is not None and isinstance(t, str):
+                    valid_texts.append(t)
+                    valid_labels.append(l)
+            
+            texts.extend(valid_texts)
+            labels.extend(valid_labels)
+            print(f"Successfully appended {len(valid_texts)} records from Hugging Face WELFake dataset.")
+        except Exception as e:
+            print(f"Error fetching dataset from Hugging Face: {e}")
+            import sys
+            sys.exit(f"Failing pipeline: Missing both local data and failed to fetch dynamically. Reason: {e}")
 
     if not texts:
         print("No training data found (neither misclassified nor original).")
