@@ -104,9 +104,13 @@ def train(original_only=False):
     training_args = TrainingArguments(
         output_dir='./results',
         num_train_epochs=3,
-        per_device_train_batch_size=8,
+        per_device_train_batch_size=2,
+        gradient_accumulation_steps=4,
+        fp16=True,
+        gradient_checkpointing=True,
         logging_dir='./logs',
         logging_steps=10,
+        report_to="none"
     )
 
     trainer = Trainer(
