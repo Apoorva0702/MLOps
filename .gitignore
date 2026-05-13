@@ -4,3 +4,4 @@ __pycache__/
 logs/
 .pytest_cache/
 model/bert_fake_news_model/
+k8s/secrets.yaml
