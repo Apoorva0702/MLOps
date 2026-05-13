@@ -176,7 +176,7 @@ def feedback(data: FeedbackInput):
     if misclassified == 1:
         cur.execute("SELECT COUNT(*) FROM news_predictions WHERE is_misclassified=1")
         count = cur.fetchone()[0]
-        if count > 0 and count % 2 == 0:
+        if count >= 2:
             logging.warning(f"Misclassification count hit {count}. Triggering Jenkins retraining pipeline!")
             try:
                 # Determine credentials source
