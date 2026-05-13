@@ -25,6 +25,22 @@ spec:
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8000
+        env:
+        - name: VAULT_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: fake-news-secrets
+              key: vault-token
+        - name: JENKINS_USER
+          valueFrom:
+            secretKeyRef:
+              name: fake-news-secrets
+              key: jenkins-user
+        - name: JENKINS_PASS
+          valueFrom:
+            secretKeyRef:
+              name: fake-news-secrets
+              key: jenkins-pass
         resources:
           requests:
             memory: "512Mi"
