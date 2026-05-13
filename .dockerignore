@@ -6,3 +6,4 @@ db/fake_news.db
 __pycache__/
 logs/
 .pytest_cache/
+results/
