@@ -12,6 +12,10 @@ import requests
 import logging
 import hvac
 from logstash_async.handler import AsynchronousLogstashHandler
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Logstash Configuration
 LOGSTASH_HOST = os.environ.get('LOGSTASH_HOST', 'logstash')
@@ -176,7 +180,7 @@ def feedback(data: FeedbackInput):
     if misclassified == 1:
         cur.execute("SELECT COUNT(*) FROM news_predictions WHERE is_misclassified=1")
         count = cur.fetchone()[0]
-        if count >= 2:
+        if count > 0 and count % 2 == 0:
             logging.warning(f"Misclassification count hit {count}. Triggering Jenkins retraining pipeline!")
             try:
                 # Determine credentials source
