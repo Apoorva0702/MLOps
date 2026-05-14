@@ -138,6 +138,18 @@ def predict(data: InputText):
     conn.commit()
     conn.close()
 
+    # Mirror the DB record to ELK as a structured log event
+    logger.info(
+        "prediction_stored",
+        extra={
+            "event_type": "prediction",
+            "record_id": row_id,
+            "article_text": data.text,
+            "predicted_label": label,
+            "confidence": round(confidence, 4),
+        }
+    )
+
     return {
         "id": row_id,
         "prediction": label,
@@ -176,6 +188,18 @@ def feedback(data: FeedbackInput):
             is_misclassified=?
         WHERE id=?
     """, (data.correct_label.upper(), misclassified, data.id))
+
+    # Mirror the feedback update to ELK as a structured log event
+    logger.info(
+        "feedback_stored",
+        extra={
+            "event_type": "feedback",
+            "record_id": data.id,
+            "predicted_label": predicted,
+            "correct_label": data.correct_label.upper(),
+            "is_misclassified": bool(misclassified),
+        }
+    )
 
     if misclassified == 1:
         cur.execute("SELECT COUNT(*) FROM news_predictions WHERE is_misclassified=1")
