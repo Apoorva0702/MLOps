@@ -41,6 +41,33 @@ app.mount("/static", StaticFiles(directory=os.path.join(BASE_DIR, "../frontend")
 MODEL_PATH = os.path.join(BASE_DIR, "../model/bert_fake_news_model")
 DB_PATH = os.path.join(BASE_DIR, "../db/fake_news.db")
 
+def init_db():
+    """Initialize the database and create tables if they don't exist."""
+    db_dir = os.path.dirname(DB_PATH)
+    if not os.path.exists(db_dir):
+        os.makedirs(db_dir)
+        print(f"Created database directory: {db_dir}")
+    
+    conn = sqlite3.connect(DB_PATH)
+    cur = conn.cursor()
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS news_predictions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            article_text TEXT,
+            predicted_label TEXT,
+            confidence REAL,
+            correct_label TEXT,
+            feedback_given INTEGER DEFAULT 0,
+            is_misclassified INTEGER DEFAULT 0
+        )
+    """)
+    conn.commit()
+    conn.close()
+    print("Database initialized successfully.")
+
+# Run database initialization
+init_db()
+
 model_name_or_path = MODEL_PATH if os.path.exists(MODEL_PATH) else "bert-base-uncased"
 tokenizer = BertTokenizer.from_pretrained(model_name_or_path)
 model = BertForSequenceClassification.from_pretrained(model_name_or_path)
