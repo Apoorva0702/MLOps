@@ -11,3 +11,4 @@ pytest
 accelerate>=1.1.0
 python-dotenv
 httpx
+prometheus-fastapi-instrumentator
