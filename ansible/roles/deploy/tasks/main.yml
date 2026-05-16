@@ -5,6 +5,7 @@
     namespace: default
     definition: "{{ lookup('file', '../../../../k8s/' + item) | from_yaml }}"
   loop:
+    - secrets.yaml
     - deployment.yaml
     - service.yaml
     - hpa.yaml
