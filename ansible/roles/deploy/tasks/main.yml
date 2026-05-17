@@ -1,14 +1,56 @@
----
-- name: Apply Kubernetes Deployment and Service
+- name: Check if secrets.yaml exists in repo
+  stat:
+    path: "{{ role_path }}/../../../../k8s/secrets.yaml"
+  register: secrets_in_repo
+
+- name: Check if secrets.yaml exists on host
+  stat:
+    path: "/home/apoorva-kharya/fake-news-detection/k8s/secrets.yaml"
+  register: secrets_on_host
+
+- name: Set secrets file path
+  set_fact:
+    secrets_file_path: "{{ role_path }}/../../../../k8s/secrets.yaml"
+  when: secrets_in_repo.stat.exists
+
+- name: Set fallback secrets file path
+  set_fact:
+    secrets_file_path: "/home/apoorva-kharya/fake-news-detection/k8s/secrets.yaml"
+  when: not secrets_in_repo.stat.exists and secrets_on_host.stat.exists
+
+- name: Apply secrets from file
+  kubernetes.core.k8s:
+    state: present
+    namespace: default
+    definition: "{{ lookup('file', secrets_file_path) | from_yaml }}"
+  when: secrets_file_path is defined
+
+- name: Apply default secrets inline if file not found
+  kubernetes.core.k8s:
+    state: present
+    namespace: default
+    definition:
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: fake-news-secrets
+      type: Opaque
+      data:
+        vault-token: ZGV2LW9ubHktdG9rZW4=
+        jenkins-user: YWRtaW4=
+        jenkins-pass: OTMzMTFlZWI0MmIzNDQzZGI2ZGVhZTUxZGZmMGU1NzE=
+  when: secrets_file_path is not defined
+
+- name: Apply Kubernetes Deployment, Service, and HPA
   kubernetes.core.k8s:
     state: present
     namespace: default
     definition: "{{ lookup('file', '../../../../k8s/' + item) | from_yaml }}"
   loop:
-    - secrets.yaml
     - deployment.yaml
     - service.yaml
     - hpa.yaml
 
 - name: Force Rollout of Deployment to pick up new image
   command: kubectl rollout restart deployment fake-news-api
+
