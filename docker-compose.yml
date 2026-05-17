@@ -35,3 +35,37 @@ services:
     cap_add:
       - IPC_LOCK
 
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - VAULT_ADDR=http://vault:8200
+      - VAULT_TOKEN=dev-only-token
+      - LOGSTASH_HOST=logstash
+    volumes:
+      - ./db:/app/db
+      - ./model:/app/model
+    depends_on:
+      - vault
+      - logstash
+
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    depends_on:
+      - api
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    depends_on:
+      - prometheus
+
+

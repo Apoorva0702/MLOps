@@ -11,6 +11,7 @@ import logging
 import hvac
 from logstash_async.handler import AsynchronousLogstashHandler
 from dotenv import load_dotenv
+from prometheus_fastapi_instrumentator import Instrumentator
 
 # Load environment variables from .env file
 load_dotenv()
@@ -34,6 +35,10 @@ logger.addHandler(logging.StreamHandler())
 logger.addHandler(logstash_handler)
 
 app = FastAPI()
+
+# Instrument FastAPI for Prometheus metrics
+Instrumentator().instrument(app).expose(app)
+
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 app.mount("/static", StaticFiles(directory=os.path.join(BASE_DIR, "../frontend")), name="static")

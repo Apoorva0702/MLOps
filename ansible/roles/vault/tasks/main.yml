@@ -1,0 +1,6 @@
+---
+- name: Apply Vault Deployment and Service
+  kubernetes.core.k8s:
+    state: present
+    namespace: default
+    definition: "{{ lookup('file', '../../../../k8s/vault.yaml') | from_yaml_all | list }}"

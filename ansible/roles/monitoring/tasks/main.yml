@@ -1,0 +1,12 @@
+---
+- name: Apply Prometheus Deployment, Service, and ConfigMap
+  kubernetes.core.k8s:
+    state: present
+    namespace: default
+    definition: "{{ lookup('file', '../../../../k8s/prometheus.yaml') | from_yaml_all | list }}"
+
+- name: Apply Grafana Deployment and Service
+  kubernetes.core.k8s:
+    state: present
+    namespace: default
+    definition: "{{ lookup('file', '../../../../k8s/grafana.yaml') | from_yaml_all | list }}"

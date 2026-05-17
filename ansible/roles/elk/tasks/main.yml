@@ -1,0 +1,6 @@
+---
+- name: Apply ELK Stack manifests (Elasticsearch, Logstash, Kibana)
+  kubernetes.core.k8s:
+    state: present
+    namespace: default
+    definition: "{{ lookup('file', '../../../../k8s/elk.yaml') | from_yaml_all | list }}"

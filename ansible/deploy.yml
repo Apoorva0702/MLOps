@@ -3,4 +3,8 @@
   hosts: localhost
   connection: local
   roles:
+    - vault
+    - elk
+    - monitoring
     - deploy
+
