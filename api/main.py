@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from transformers import BertTokenizer, BertForSequenceClassification
 import torch
@@ -121,6 +121,35 @@ class InputText(BaseModel):
 class FeedbackInput(BaseModel):
     id: int
     correct_label: str
+
+
+
+# ---------- Health Check ----------
+
+@app.get("/health")
+def health_check():
+    """Verify application health (model loaded & database responsive)."""
+    # 1. Check if model and tokenizer are initialized
+    if model is None or tokenizer is None:
+        return JSONResponse(
+            status_code=503,
+            content={"status": "unhealthy", "error": "BERT model or tokenizer not loaded"}
+        )
+        
+    # 2. Check if SQLite database is responsive
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        cur = conn.cursor()
+        cur.execute("SELECT 1")
+        cur.fetchone()
+        conn.close()
+    except Exception as e:
+        return JSONResponse(
+            status_code=503,
+            content={"status": "unhealthy", "error": f"Database unresponsive: {str(e)}"}
+        )
+
+    return {"status": "healthy", "model_loaded": True, "database": "connected"}
 
 
 # ---------- Home ----------
@@ -249,13 +278,14 @@ def feedback(data: FeedbackInput):
                     logger.error("No Jenkins password found in Environment Variables. Pipeline trigger will fail.")
                     return {"error": "Missing Jenkins credentials"}
 
-                logger.info(f"Triggering Jenkins for user: {username}")
+                jenkins_url = os.environ.get('JENKINS_URL', 'http://localhost:9090')
+                logger.info(f"Triggering Jenkins for user: {username} at {jenkins_url}")
                 auth = (username, password)
                 session = requests.Session()
                 session.auth = auth
                 
                 # Fetch Crumb for CSRF protection
-                crumb_url = "http://localhost:9090/crumbIssuer/api/json"
+                crumb_url = f"{jenkins_url.rstrip('/')}/crumbIssuer/api/json"
                 crumb_resp = session.get(crumb_url, timeout=5)
                 
                 headers = {}
@@ -265,7 +295,7 @@ def feedback(data: FeedbackInput):
                 else:
                     logger.warning(f"Could not fetch Jenkins crumb (Status: {crumb_resp.status_code}). Attempting trigger without crumb...")
                 
-                webhook_url = "http://localhost:9090/job/fake_news_Retraining/build"
+                webhook_url = f"{jenkins_url.rstrip('/')}/job/fake_news_Retraining/build"
                 resp = session.post(webhook_url, headers=headers, timeout=5)
                 
                 if resp.status_code in [200, 201, 202]:

@@ -5,6 +5,10 @@ import pandas as pd
 from transformers import BertTokenizer, BertForSequenceClassification, Trainer, TrainingArguments
 from datasets import Dataset
 
+# Restrict PyTorch to use a maximum of 2 CPU threads to prevent CPU starvation
+torch.set_num_threads(2)
+
+
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, "../db/fake_news.db")
 MODEL_PATH = os.path.join(BASE_DIR, "../model/bert_fake_news_model")
@@ -105,7 +109,8 @@ def train(original_only=False):
     training_args = TrainingArguments(
         output_dir='./results',
         num_train_epochs=1 if original_only else 3,
-        per_device_train_batch_size=8 if not original_only else 4,
+        # Reduced batch sizes to prevent memory spikes and swap storms
+        per_device_train_batch_size=4 if not original_only else 2,
         use_cpu=original_only,
         logging_dir='./logs',
         logging_steps=10,

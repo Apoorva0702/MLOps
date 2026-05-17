@@ -25,6 +25,22 @@ spec:
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8000
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 25
+          periodSeconds: 10
+          timeoutSeconds: 3
+          failureThreshold: 3
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 15
+          timeoutSeconds: 3
+          failureThreshold: 3
         env:
         - name: VAULT_TOKEN
           valueFrom:
@@ -41,6 +57,8 @@ spec:
             secretKeyRef:
               name: fake-news-secrets
               key: jenkins-pass
+        - name: JENKINS_URL
+          value: "http://192.168.49.1:9090"
         resources:
           requests:
             memory: "512Mi"

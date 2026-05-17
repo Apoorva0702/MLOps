@@ -49,3 +49,13 @@ def test_feedback_endpoint():
     assert data["id"] == row_id
     assert data["correct_label"] == "REAL"
     assert "is_misclassified" in data
+
+def test_health_endpoint():
+    """Test the health check endpoint returns 200 OK and correct JSON structure."""
+    response = client.get("/health")
+    assert response.status_code == 200
+    data = response.json()
+    assert data["status"] == "healthy"
+    assert data["model_loaded"] is True
+    assert data["database"] == "connected"
+
