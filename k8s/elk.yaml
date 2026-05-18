@@ -19,6 +19,18 @@ data:
       stdout { codec => rubydebug }
     }
 ---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: elasticsearch-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: standard
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -35,6 +47,8 @@ spec:
       labels:
         app: elasticsearch
     spec:
+      securityContext:
+        fsGroup: 1000
       containers:
       - name: elasticsearch
         image: docker.elastic.co/elasticsearch/elasticsearch:8.11.1
@@ -50,6 +64,13 @@ spec:
             memory: 1.5Gi
           requests:
             memory: 512Mi
+        volumeMounts:
+        - name: elasticsearch-data
+          mountPath: /usr/share/elasticsearch/data
+      volumes:
+      - name: elasticsearch-data
+        persistentVolumeClaim:
+          claimName: elasticsearch-pvc
 ---
 apiVersion: v1
 kind: Service

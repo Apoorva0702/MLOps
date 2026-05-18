@@ -72,3 +72,10 @@ spec:
           limits:
             memory: "1Gi"
             cpu: "500m"
+        volumeMounts:
+        - name: db-volume
+          mountPath: /app/db
+      volumes:
+      - name: db-volume
+        persistentVolumeClaim:
+          claimName: fake-news-db-pvc

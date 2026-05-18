@@ -20,6 +20,7 @@
     namespace: default
     definition: "{{ lookup('file', '../../../../k8s/' + item) | from_yaml }}"
   loop:
+    - db-pvc.yaml
     - deployment.yaml
     - service.yaml
     - hpa.yaml

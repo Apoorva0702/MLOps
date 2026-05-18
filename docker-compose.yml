@@ -1,29 +1,4 @@
 services:
-  elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.1
-    environment:
-      - discovery.type=single-node
-      - xpack.security.enabled=false
-    ports:
-      - "9200:9200"
-
-  logstash:
-    image: docker.elastic.co/logstash/logstash:8.11.1
-    ports:
-      - "5044:5044"
-      - "5000:5000/tcp"
-    volumes:
-      - ./logstash/logstash.conf:/usr/share/logstash/pipeline/logstash.conf:ro
-
-  kibana:
-    image: docker.elastic.co/kibana/kibana:8.11.1
-    ports:
-      - "5601:5601"
-    environment:
-      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
-    depends_on:
-      - elasticsearch
-
   vault:
     image: hashicorp/vault:latest
     ports:
@@ -53,5 +28,5 @@ services:
       - ./model:/app/model
     depends_on:
       - vault
-      - logstash
+
 
