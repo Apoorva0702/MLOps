@@ -10,9 +10,9 @@ torch.set_num_threads(2)
 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DB_PATH = os.path.join(BASE_DIR, "../db/fake_news.db")
+DB_PATH = os.environ.get("RETRAIN_DB_PATH", os.path.join(BASE_DIR, "../db/fake_news.db"))
 MODEL_PATH = os.path.join(BASE_DIR, "../model/bert_fake_news_model")
-DATA_PATH = os.path.join(BASE_DIR, "../data/original_dataset.csv")
+DATA_PATH = os.environ.get("RETRAIN_DATA_PATH", os.path.join(BASE_DIR, "../data/original_dataset.csv"))
 
 def fetch_misclassified_data():
     conn = sqlite3.connect(DB_PATH)

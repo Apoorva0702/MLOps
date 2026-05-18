@@ -12,7 +12,7 @@
       data:
         vault-token: "{{ lookup('env', 'VAULT_TOKEN') | default('dev-only-token', true) | b64encode }}"
         jenkins-user: "{{ lookup('env', 'JENKINS_USER') | default('admin', true) | b64encode }}"
-        jenkins-pass: "{{ lookup('env', 'JENKINS_PASS') | default('93311eeb42b3443db6deae51dff0e571', true) | b64encode }}"
+        jenkins-pass: "{{ lookup('env', 'JENKINS_PASS') | b64encode }}"
 
 - name: Apply Kubernetes Deployment, Service, and HPA
   kubernetes.core.k8s:

@@ -18,21 +18,35 @@ load_dotenv()
 
 # Logstash Configuration
 LOGSTASH_HOST = os.environ.get('LOGSTASH_HOST', 'logstash')
-LOGSTASH_PORT = 5000
-
-logstash_handler = AsynchronousLogstashHandler(
-    host=LOGSTASH_HOST, 
-    port=LOGSTASH_PORT, 
-    database_path='logstash.db'
-)
+LOGSTASH_PORT = int(os.environ.get('LOGSTASH_PORT', 5000))
+ENABLE_LOGSTASH = os.environ.get('ENABLE_LOGSTASH', 'false').lower() == 'true'
 
 # Root Logger Config
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 # Keep console handler
 logger.addHandler(logging.StreamHandler())
-# Add logstash handler
-logger.addHandler(logstash_handler)
+
+if ENABLE_LOGSTASH:
+    try:
+        logstash_handler = AsynchronousLogstashHandler(
+            host=LOGSTASH_HOST, 
+            port=LOGSTASH_PORT, 
+            database_path='logstash.db'
+        )
+        logger.addHandler(logstash_handler)
+        print(f"Logstash logging enabled. Target: {LOGSTASH_HOST}:{LOGSTASH_PORT}")
+    except Exception as e:
+        print(f"Failed to initialize Logstash handler: {e}")
+else:
+    print("Logstash logging is disabled (ENABLE_LOGSTASH is not set to 'true').")
+    # Clean up leftover logstash.db if it exists to prevent disk accumulation
+    if os.path.exists('logstash.db'):
+        try:
+            os.remove('logstash.db')
+            print("Cleaned up unused logstash.db file.")
+        except Exception as e:
+            print(f"Could not clean up logstash.db: {e}")
 
 app = FastAPI()
 

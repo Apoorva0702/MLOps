@@ -33,11 +33,43 @@ pipeline {
                 echo 'Retraining pipeline triggered by misclassification threshold! Training on Original Data + Database Data...'
                 sh '''
                     mkdir -p db data
-                    kubectl cp $(kubectl get pod -l app=fake-news -o jsonpath='{.items[0].metadata.name}'):/app/db/fake_news.db db/fake_news.db || cp /home/apoorva-kharya/fake-news-detection/db/fake_news.db db/fake_news.db || echo "Warning: fake_news.db not found"
-                    cp /home/apoorva-kharya/fake-news-detection/data/original_dataset.csv data/ || echo "Warning: original_dataset.csv not found"
+                    
+                    # Resolve source paths from environment or parameters, defaulting to the local dev paths
+                    DB_SRC="${SRC_DB_PATH:-/home/apoorva-kharya/fake-news-detection/db/fake_news.db}"
+                    DATA_SRC="${SRC_DATA_PATH:-/home/apoorva-kharya/fake-news-detection/data/original_dataset.csv}"
+                    
+                    if [ -f "$DB_SRC" ]; then
+                        echo "Copying database from $DB_SRC..."
+                        cp "$DB_SRC" db/fake_news.db
+                    else
+                        echo "Warning: Database not found at $DB_SRC."
+                        if [ -f "db/fake_news.db" ]; then
+                            echo "Using database already present in workspace db/ directory."
+                        else
+                            echo "No database found. Retraining script will check relative default directories."
+                        fi
+                    fi
+
+                    if [ -f "$DATA_SRC" ]; then
+                        echo "Copying original dataset from $DATA_SRC..."
+                        cp "$DATA_SRC" data/original_dataset.csv
+                    else
+                        echo "Warning: Original dataset not found at $DATA_SRC."
+                        if [ -f "data/original_dataset.csv" ]; then
+                            echo "Using original dataset already present in workspace data/ directory."
+                        else
+                            echo "No original dataset found. Dynamic WELFake download from Hugging Face will be used as fallback."
+                        fi
+                    fi
+
                     . venv-jk/bin/activate
+                    
+                    # Run training script with environment variables set
+                    export RETRAIN_DB_PATH="$(pwd)/db/fake_news.db"
+                    export RETRAIN_DATA_PATH="$(pwd)/data/original_dataset.csv"
+                    
                     python model/train.py
-                    echo "Model full retraining script executed!"
+                    echo "Model full retraining script executed successfully!"
                 '''
             }
         }

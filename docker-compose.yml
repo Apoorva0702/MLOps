@@ -18,6 +18,7 @@ services:
       - VAULT_ADDR=http://vault:8200
       - VAULT_TOKEN=dev-only-token
       - LOGSTASH_HOST=logstash
+      - ENABLE_LOGSTASH=false
       - JENKINS_URL=http://host.docker.internal:9090
       - JENKINS_USER=${JENKINS_USER}
       - JENKINS_PASS=${JENKINS_PASS}

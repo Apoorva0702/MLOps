@@ -63,6 +63,8 @@ spec:
           value: "logstash"
         - name: LOGSTASH_PORT
           value: "5000"
+        - name: ENABLE_LOGSTASH
+          value: "true"
         - name: VAULT_ADDR
           value: "http://vault:8200"
         resources:
